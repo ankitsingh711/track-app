@@ -62,7 +62,7 @@ app.get('/', async (req, res) => {
     console.log('Email sent: ' + info.response);
   });
 
-  res.send('Hey there ! My Name is Aman Singh Chauhan');
+  res.send('Hey there !');
 });
 
 const port = process.env.PORT || 3000;
