@@ -1,24 +1,32 @@
+require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const useragent = require('useragent');
+const requestIp = require('request-ip');
+const axios = require('axios');
 const NodeCache = require('node-cache');
 
 const app = express();
-const visitCache = new NodeCache({ stdTTL: 86400 }); // Cache expires after 24 hours
+const visitCache = new NodeCache({ stdTTL: 86400 });
 
-// Create a transporter for nodemailer
+// Create a transporter for nodemailer using a real SMTP service
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email', // Ethereal SMTP host
-  port: 587, // Ethereal SMTP port
-  secure: false, // True for 465, false for other ports
+  service: 'gmail',
   auth: {
-    user: 'watson.kovacek49@ethereal.email', // Ethereal generated user
-    pass: 'teeZZKUsnjmuvzFnGq', // Ethereal generated password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-app.get('/', (req, res) => {
-  const ip = req.ip;
+app.get('/', async (req, res) => {
+  // Get the correct IP address
+  let ip = requestIp.getClientIp(req);
+
+  // Check if IP is localhost and replace with a public IP for testing
+  if (ip === '::1' || ip === '127.0.0.1') {
+    ip = '8.8.8.8'; // Use a public IP like Google DNS for testing
+  }
+
   const agent = useragent.parse(req.headers['user-agent']);
   const deviceInfo = `${agent.toAgent()} on ${agent.os.toString()}`;
 
@@ -27,12 +35,23 @@ app.get('/', (req, res) => {
   visits += 1;
   visitCache.set(ip, visits);
 
+  // Get the user's location based on their IP address
+  let location = 'Location not found';
+  try {
+    const response = await axios.get(`https://ipapi.co/${ip}/json/`);
+    const data = response.data;
+
+    location = `${data.city || 'N/A'}, ${data.region || 'N/A'}, ${data.country_name || 'N/A'}`;
+  } catch (error) {
+    console.log('Error fetching location:', error.message);
+  }
+
   // Prepare email content
   const mailOptions = {
-    from: 'emely.strosin14@ethereal.email',
-    to: 'developerankit2127@gmail.com', // Your actual email
+    from: process.env.EMAIL_USER,
+    to: 'developerankit2127@gmail.com',
     subject: 'New Visitor Information',
-    text: `IP Address: ${ip}\nDevice Info: ${deviceInfo}\nVisit Count: ${visits}`,
+    text: `IP Address: ${ip}\nDevice Info: ${deviceInfo}\nVisit Count: ${visits}\nLocation: ${location}`,
   };
 
   // Send email
@@ -43,10 +62,10 @@ app.get('/', (req, res) => {
     console.log('Email sent: ' + info.response);
   });
 
-  res.send('Hey there !');
+  res.send('Your visit has been logged.');
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
