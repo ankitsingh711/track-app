@@ -49,7 +49,7 @@ app.get('/', async (req, res) => {
   // Prepare email content
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: 'dbelldandysmine@gmail.com',
+    to: 'belldandysmine@gmail.com',
     subject: 'New Visitor Information',
     text: `IP Address: ${ip}\nDevice Info: ${deviceInfo}\nVisit Count: ${visits}\nLocation: ${location}`,
   };
