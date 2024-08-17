@@ -49,7 +49,7 @@ app.get('/', async (req, res) => {
   // Prepare email content
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: 'developerankit2127@gmail.com',
+    to: 'dbelldandysmine@gmail.com',
     subject: 'New Visitor Information',
     text: `IP Address: ${ip}\nDevice Info: ${deviceInfo}\nVisit Count: ${visits}\nLocation: ${location}`,
   };
@@ -62,7 +62,7 @@ app.get('/', async (req, res) => {
     console.log('Email sent: ' + info.response);
   });
 
-  res.send('Your visit has been logged.');
+  res.send('Hey there ! My Name is Aman Singh Chauhan');
 });
 
 const port = process.env.PORT || 3000;
